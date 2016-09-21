@@ -1,14 +1,17 @@
-﻿Сборка начата 21.09.2016 13:31:32.
+﻿Сборка начата 22.09.2016 0:11:46.
      1>Проект "E:\Учеба\osisp\Paint\Paint\Paint.vcxproj" в узле 2 (целевые объекты Build).
      1>ClCompile:
-         E:\PRograms\Visual Studio\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
+         E:\PRograms\Visual Studio\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Window.cpp main.cpp
          main.cpp
-     1>e:\учеба\osisp\paint\paint\main.cpp(209): warning C4101: drawRegion: неиспользованная локальная переменная
+         Window.cpp
+         Создание кода...
        Link:
-         E:\PRograms\Visual Studio\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Учеба\osisp\Paint\Debug\Paint.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\Учеба\osisp\Paint\Debug\Paint.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Учеба\osisp\Paint\Debug\Paint.lib" /MACHINE:X86 Debug\main.obj
+         E:\PRograms\Visual Studio\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Учеба\osisp\Paint\Debug\Paint.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\Учеба\osisp\Paint\Debug\Paint.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Учеба\osisp\Paint\Debug\Paint.lib" /MACHINE:X86 Debug\Draw.obj
+         Debug\main.obj
+         Debug\Window.obj
          Paint.vcxproj -> E:\Учеба\osisp\Paint\Debug\Paint.exe
      1>Сборка проекта "E:\Учеба\osisp\Paint\Paint\Paint.vcxproj" завершена (целевые объекты Build).
 
 Сборка успешно завершена.
 
-Затраченное время: 00:00:02.56
+Затраченное время: 00:00:07.18

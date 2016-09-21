@@ -5,12 +5,14 @@
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); // message handler
 BOOL Line(HDC hdc, int x1, int y1, int x2, int y2); 
 BOOL Redraw(HWND hWnd, BOOL isToClearArea);
+void draw(HDC drawingHDC, HDC resultHDC, UINT drawItems, POINT previousMousePosition, POINT mousePosition);
 void MenuCommand(HWND hWnd, WPARAM param);
 void TrackMouse(HWND hwnd);
 UINT CheckDrawItem();
-void draw(HWND hWnd, POINT *previousMousePostion, POINT *mousePosition, UINT drawItem);
+void prepareDrawing(HWND hWnd, POINT *previousMousePostion, POINT *mousePosition, UINT drawItem);
 void OpenFileWindow(HWND hWnd);
 HMENU drawItemsMenu;
+int deviceX, deviceY;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					LPSTR lpCmdLine, int nCmdShow)
@@ -85,10 +87,11 @@ void CreateMainMenu(HWND hWnd)
 LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 
-	static bool isMousePressed = false;
+	static bool isDrawing = false;
 	HDC hdc;
 	PAINTSTRUCT paintStruct;
-	static HDC tempHDC;
+	static HDC drawingHDC;
+	static HDC finalHDC;
 	static POINT mousePosition;
 	static POINT previousMousePosition;
 	static UINT drawItem;
@@ -96,46 +99,87 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg)
 	{
 		case WM_CREATE:
+		{
+			HBITMAP bmFinalCopy;
+			HBITMAP bmDrawingCopy;
+			HBRUSH brush;
+
+			brush = CreateSolidBrush(0xffffff);
 			CreateMainMenu(hWnd);
+			hdc = GetDC(hWnd);
+			deviceX = GetDeviceCaps(hdc, HORZRES);
+			deviceY = GetDeviceCaps(hdc, VERTRES);
+			// Drawing HDC //
+			drawingHDC = CreateCompatibleDC(hdc);
+			bmDrawingCopy = CreateCompatibleBitmap(drawingHDC, deviceX, deviceY);
+			SelectObject(drawingHDC, bmDrawingCopy);
+			SelectObject(drawingHDC, brush);
+			PatBlt(drawingHDC, 0, 0, deviceX, deviceY, PATCOPY);
+			// Result HDC //
+			finalHDC = CreateCompatibleDC(hdc);
+			bmFinalCopy = CreateCompatibleBitmap(finalHDC, deviceX, deviceY);
+			SelectObject(finalHDC, bmFinalCopy);
+			SelectObject(finalHDC, brush);
+			PatBlt(finalHDC, 0, 0, deviceX, deviceY, PATCOPY);
+
+			ReleaseDC(hWnd, hdc);
+			DeleteObject(brush);
+			DeleteObject(bmDrawingCopy);
+			DeleteObject(bmFinalCopy);
+
 			break;
+		}
 
 		case WM_LBUTTONDOWN:
-			tempHDC = CreateCompatibleDC(NULL);
-			isMousePressed = true;
+			isDrawing = true;
 			GetCursorPos(&mousePosition);
 			ScreenToClient(hWnd, &mousePosition);
 			previousMousePosition = mousePosition;
 			break;
 
 		case WM_MOUSELEAVE:
-			isMousePressed = false;
+			hdc = GetDC(hWnd);
+			StretchBlt(finalHDC, 0, 0, deviceX, deviceY, hdc, 0, 0, deviceX, deviceY, SRCCOPY);
+			isDrawing = false;
+			ReleaseDC(hWnd, hdc);
 			break;
 
 		case WM_LBUTTONUP:
-			isMousePressed = false;
+			hdc = GetDC(hWnd);
+			StretchBlt(finalHDC, 0, 0, deviceX, deviceY, hdc, 0, 0, deviceX, deviceY, SRCCOPY);
+			isDrawing = false;
+			ReleaseDC(hWnd, hdc);
 			break;
 
 		case WM_MOUSEMOVE:
 		{
 			TrackMouse(hWnd);
-			drawItem = CheckDrawItem();
-			draw(hWnd, &previousMousePosition, &mousePosition, drawItem);
+			if (isDrawing)
+			{
+				drawItem = CheckDrawItem();
+				if (drawItem != MENU_PENCIL)
+				{
+					StretchBlt(drawingHDC, 0, 0, deviceX, deviceY, finalHDC, 0, 0, deviceX, deviceY, SRCCOPY);
+				}
+				prepareDrawing(hWnd, &previousMousePosition, &mousePosition, drawItem);
+			}
 			break;
 		}
 		case WM_COMMAND:
 			MenuCommand(hWnd, wParam);
 			break;
 		case WM_PAINT:
-			if (isMousePressed)
-			{
+			if (isDrawing)
+			{	
 				hdc = BeginPaint(hWnd, &paintStruct);
-				Line(hdc, previousMousePosition.x, previousMousePosition.y, mousePosition.x, mousePosition.y);
-				SetPixel(GetDC(hWnd), 10, 10, RGB(255, 0, 0));
+				draw(drawingHDC, hdc, drawItem, previousMousePosition, mousePosition);
 				EndPaint(hWnd, &paintStruct);
 			}
 			break;
 
 		case WM_DESTROY:
+			DeleteObject(drawingHDC);
+			DeleteObject(finalHDC);
 			PostQuitMessage(NULL); // send close message
 			break;
 
@@ -145,8 +189,24 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return NULL;
 }
 
-void draw(HWND hWnd, POINT *previousMousePosition, POINT *mousePosition, UINT drawItem)
+void draw(HDC drawingHDC, HDC resultHDC, UINT drawItems, POINT previousMousePosition, POINT mousePosition)
 {
+	switch (drawItems)
+	{
+		case MENU_PENCIL:
+			Line(resultHDC, previousMousePosition.x, previousMousePosition.y, mousePosition.x, mousePosition.y);
+			break;
+		case MENU_LINE:
+			Line(drawingHDC, previousMousePosition.x, previousMousePosition.y, mousePosition.x, mousePosition.y);
+			StretchBlt(resultHDC, 0, 0, deviceX, deviceY, drawingHDC, 0, 0, deviceX, deviceY, SRCCOPY);
+			break;
+
+	}
+}
+
+void prepareDrawing(HWND hWnd, POINT *previousMousePosition, POINT *mousePosition, UINT drawItem)
+{
+	HDC drawRegion;
 	switch (drawItem)
 	{
 		case MENU_PENCIL:
@@ -165,6 +225,7 @@ void draw(HWND hWnd, POINT *previousMousePosition, POINT *mousePosition, UINT dr
 			{
 				ScreenToClient(hWnd, mousePosition);
 				Redraw(hWnd, FALSE);
+				//UpdateWindow(hWnd);
 			}
 			break;
 	}

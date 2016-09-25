@@ -1,6 +1,9 @@
 #include <windows.h>
 #include "MenuBar.h"
 
+#define START_PEN_WIDTH 2
+#define START_PEN_COLOR RGB(0, 0, 0)
+
 class Paint
 {
 private:
@@ -10,6 +13,7 @@ private:
 	int hdcHeigth;
 	HPEN currentPen;
 	DWORD currentColor;
+	int currentPenWidth;
 
 	void initializeHDC(HWND hWnd)
 	{
@@ -46,6 +50,10 @@ public:
 	Paint(HWND hWnd)
 	{
 		initializeHDC(hWnd);
+		currentPenWidth = START_PEN_WIDTH;
+		currentColor = START_PEN_COLOR;
+		currentPen = CreatePen(PS_SOLID, currentPenWidth, currentColor);
+		setPen();
 	}
 
 	void drawLine(HDC hdc, int x1, int y1, int x2, int y2)
@@ -77,9 +85,15 @@ public:
 	void setColor(DWORD color)
 	{
 		currentColor = color;
-		currentPen = CreatePen(PS_SOLID, 10, color);
-		SelectObject(finalPicture, currentPen);
-		SelectObject(drawingArea, currentPen);
+		currentPen = CreatePen(PS_SOLID, currentPenWidth, currentColor);
+		setPen();
+	}
+
+	void setPenWidth(int penWidth)
+	{
+		currentPenWidth = penWidth;
+		currentPen = CreatePen(PS_SOLID, currentPenWidth, currentColor);
+		setPen();
 	}
 
 	void onClose()
@@ -87,6 +101,16 @@ public:
 		DeleteObject(currentPen);
 		DeleteObject(drawingArea);
 		DeleteObject(finalPicture);
+	}
+
+private:
+	void setPen()
+	{
+		HPEN temp;
+		temp = (HPEN)SelectObject(drawingArea, currentPen);
+		DeleteObject(temp);
+		temp = (HPEN)SelectObject(finalPicture, currentPen);
+		DeleteObject(temp);
 	}
 
 };

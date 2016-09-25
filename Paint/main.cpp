@@ -5,12 +5,13 @@
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); // message handler
 void MenuCommand(HWND hWnd, WPARAM param);
+void setChoosenWidth(int choosenWidth);
 void TrackMouse(HWND hwnd);
 UINT CheckDrawItem();
 void OpenFileWindow(HWND hWnd);
 void chooseColor(HWND hWnd);
 HMENU drawItemsMenu;
-HMENU colorMenu;
+HMENU widthPenMenu;
 int deviceX, deviceY;
 Window *window;
 
@@ -63,6 +64,7 @@ void CreateMainMenu(HWND hWnd)
 {
 	HMENU hMenu = CreateMenu();
 	HMENU subMenu = CreateMenu();
+	HMENU colorMenu;
 	
 	AppendMenu(subMenu, MF_STRING, MENU_OPEN, L"Open");
 	AppendMenu(subMenu, MF_STRING, MENU_CREATE, L"Create");
@@ -75,6 +77,15 @@ void CreateMainMenu(HWND hWnd)
 	AppendMenu(drawItemsMenu, MF_CHECKED, MENU_PENCIL, L"Pencil");
 	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_LINE, L"Line");
 	AppendMenu(hMenu, MF_POPUP, (UINT)drawItemsMenu, L"Draw Items");
+
+	widthPenMenu = CreateMenu();
+	AppendMenu(widthPenMenu, MF_UNCHECKED, MENU_WIDTH_1, L"1");
+	AppendMenu(widthPenMenu, MF_CHECKED, MENU_WIDTH_2, L"2");
+	AppendMenu(widthPenMenu, MF_UNCHECKED, MENU_WIDTH_3, L"3");
+	AppendMenu(widthPenMenu, MF_UNCHECKED, MENU_WIDTH_4, L"4");
+	AppendMenu(widthPenMenu, MF_UNCHECKED, MENU_WIDTH_5, L"5");
+	AppendMenu(widthPenMenu, MF_UNCHECKED, MENU_WIDTH_6, L"6");
+	AppendMenu(hMenu, MF_POPUP, (UINT)widthPenMenu, L"Width");
 
 	colorMenu = CreateMenu();
 	AppendMenu(colorMenu, MF_STRING, MENU_COLOR, L"Color");
@@ -200,8 +211,21 @@ void MenuCommand(HWND hWnd, WPARAM param)
 			CheckMenuItem(drawItemsMenu, MENU_PENCIL, MF_UNCHECKED);
 			CheckMenuItem(drawItemsMenu, MENU_LINE, MF_CHECKED);
 			break;
-
+		default:
+			if (param <= MENU_WIDTH_6 || param >= MENU_WIDTH_1)
+			{
+				setChoosenWidth(param);
+				window->setPenWidth(param);
+			}
 	}
+}
+
+void setChoosenWidth(int choosenWidth)
+{
+	static int previousWidth = MENU_WIDTH_2;
+	CheckMenuItem(widthPenMenu, choosenWidth, MF_CHECKED);
+	CheckMenuItem(widthPenMenu, previousWidth, MF_UNCHECKED);
+	previousWidth = choosenWidth;
 }
 
 void chooseColor(HWND hWnd)
@@ -221,7 +245,7 @@ void chooseColor(HWND hWnd)
 	if (ChooseColor(&chooseColor) == TRUE)
 	{
 		rgbCurrent = chooseColor.rgbResult;
-		window->setColorBrush(rgbCurrent);
+		window->setColorPen(rgbCurrent);
 	}
 
 }

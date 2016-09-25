@@ -74,9 +74,14 @@ public:
 		return isDrawing;
 	}
 
-	void setColorBrush(DWORD color)
+	void setColorPen(DWORD color)
 	{
 		paint->setColor(color);
+	}
+
+	void setPenWidth(int penWidth)
+	{
+		paint->setPenWidth(penWidth);
 	}
 
 	void onClose()

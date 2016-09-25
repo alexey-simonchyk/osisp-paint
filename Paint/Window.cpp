@@ -40,6 +40,7 @@ public:
 	{
 		if (!isDrawing)
 		{
+			paint->updateWindow(hdc);
 			return;
 		}
 		switch (currentDrawItem)
@@ -61,7 +62,7 @@ public:
 		isDrawing = true;
 	}
 
-	void endDraw(HWND hWnd)
+	void endDraw(HWND hWnd, LPARAM lParam)
 	{
 		paint->endDraw(hWnd);
 		isDrawing = false;
@@ -82,6 +83,18 @@ public:
 	void setPenWidth(int penWidth)
 	{
 		paint->setPenWidth(penWidth);
+	}
+
+	void changeZoom(bool isIncrease)
+	{
+		if (isIncrease)
+		{
+			paint->increaseZoom();
+		}
+		else
+		{
+			paint->decreaseZoom();
+		}
 	}
 
 	void onClose()

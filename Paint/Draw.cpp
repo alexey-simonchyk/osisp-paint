@@ -3,6 +3,9 @@
 
 #define START_PEN_WIDTH 2
 #define START_PEN_COLOR RGB(0, 0, 0)
+#define ZOOM_STEP 0.5
+#define ZOOM_MAX 9
+#define ZOOM_MIN 1
 
 class Paint
 {
@@ -14,6 +17,7 @@ private:
 	HPEN currentPen;
 	DWORD currentColor;
 	int currentPenWidth;
+	double currentZoom;
 
 	void initializeHDC(HWND hWnd)
 	{
@@ -53,27 +57,29 @@ public:
 		currentPenWidth = START_PEN_WIDTH;
 		currentColor = START_PEN_COLOR;
 		currentPen = CreatePen(PS_SOLID, currentPenWidth, currentColor);
+		currentZoom = 1;
 		setPen();
 	}
 
 	void drawLine(HDC hdc, int x1, int y1, int x2, int y2)
 	{
+		realCoordinates(&x1, &y1, &x2, &y2);
 		StretchBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
 		line(drawingArea, x1, y1, x2, y2);
-		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
+		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth / currentZoom, hdcHeigth / currentZoom, SRCCOPY);
 	}
 
 	void drawPencil(HDC hdc, int x1, int y1, int x2, int y2)
 	{
+		realCoordinates(&x1, &y1, &x2, &y2);
 		line(finalPicture, x1, y1, x2, y2);
-		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
+		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth / currentZoom, hdcHeigth / currentZoom, SRCCOPY);
+		StretchBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
 	}
 
 	void endDraw(HWND hWnd)
 	{
-		HDC tempDC = GetDC(hWnd);
-		StretchBlt(finalPicture, 0, 0, hdcWidth, hdcHeigth, tempDC, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
-		ReleaseDC(hWnd, tempDC);
+		StretchBlt(finalPicture, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
 	}
 
 	BOOL line(HDC hdc, int x1, int y1, int x2, int y2)
@@ -103,6 +109,23 @@ public:
 		DeleteObject(finalPicture);
 	}
 
+	void increaseZoom()
+	{
+		if (currentZoom < ZOOM_MAX)
+			currentZoom += ZOOM_STEP;
+	}
+
+	void decreaseZoom()
+	{
+		if (currentZoom > ZOOM_MIN)
+			currentZoom -= ZOOM_STEP;
+	}
+
+	void updateWindow(HDC hdc)
+	{
+		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth / currentZoom, hdcHeigth / currentZoom, SRCCOPY);
+	}
+
 private:
 	void setPen()
 	{
@@ -113,4 +136,11 @@ private:
 		DeleteObject(temp);
 	}
 
+	void realCoordinates(int *x1, int *y1, int *x2, int *y2)
+	{
+		*x1 /= currentZoom;
+		*y2 /= currentZoom;
+		*x2 /= currentZoom;
+		*y1 /= currentZoom;
+	}
 };

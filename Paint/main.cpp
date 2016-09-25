@@ -12,7 +12,6 @@ void OpenFileWindow(HWND hWnd);
 void chooseColor(HWND hWnd);
 HMENU drawItemsMenu;
 HMENU widthPenMenu;
-int deviceX, deviceY;
 Window *window;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -95,15 +94,10 @@ void CreateMainMenu(HWND hWnd)
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	static bool isDrawing = false;
 	HDC hdc;
 	PAINTSTRUCT paintStruct;
-	static HDC drawingHDC;
-	static HDC finalHDC;
-	static POINT mousePosition;
-	static POINT previousMousePosition;
 	static UINT drawItem;
-	COLORREF colorText = RGB(255, 0, 0);
+	
 	switch (uMsg)
 	{
 		case WM_CREATE:
@@ -112,6 +106,18 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			window = new Window(hWnd);
 			break;
 		}
+
+		case WM_MOUSEWHEEL:
+			if ((short)HIWORD(wParam) < 0)
+			{
+				window->changeZoom(false);
+			}
+			else
+			{
+				window->changeZoom(true);
+			}
+			window->sendRedrawMsg(hWnd, FALSE);
+			break;
 
 		case WM_LBUTTONDOWN:
 			
@@ -123,11 +129,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_MOUSELEAVE:
-			window->endDraw(hWnd);
+			window->endDraw(hWnd, lParam);
 			break;
 
 		case WM_LBUTTONUP:
- 			window->endDraw(hWnd);
+			window->endDraw(hWnd, lParam);
 			break;
 
 		case WM_MOUSEMOVE:
@@ -150,6 +156,10 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_DESTROY:
 			window->onClose();
 			PostQuitMessage(NULL); // send close message
+			break;
+
+		case WM_VSCROLL:
+
 			break;
 
 		default:

@@ -4,16 +4,19 @@
 class Window
 {
 private:
-	Paint paint;
+	Paint *paint;
 	POINT mousePosition;
 	POINT previousMousePosition;
 	bool isNeedUpdateMousePos  = true;
+	bool isDrawing;
+	UINT currentDrawItem;
 	
 public:
 
-	void create(HWND hWnd)
+	Window(HWND hWnd)
 	{
-		paint.create(hWnd);
+		isDrawing = false;
+		paint = new Paint(hWnd);
 	}
 
 	BOOL sendRedrawMsg(HWND hWnd, BOOL isToClearArea)
@@ -35,27 +38,49 @@ public:
 
 	void draw(HDC hdc)
 	{
-		if (paint.getIsDrawing())
-			paint.draw(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y);
+		if (!isDrawing)
+		{
+			return;
+		}
+		switch (currentDrawItem)
+		{
+			case MENU_LINE:
+				paint->drawLine(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y);
+				break;
+			case MENU_PENCIL:
+				paint->drawPencil(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y);
+				break;
+		}
 	}
 
 	void setDrawItem(UINT drawItem, HWND hWnd)
 	{
-		paint.setDrawItem(drawItem);
+		currentDrawItem = drawItem;
 		isNeedUpdateMousePos = drawItem == MENU_PENCIL ? true : false;
 		setMousePosition(hWnd);
-		paint.beginDraw();
+		isDrawing = true;
 	}
 
 	void endDraw(HWND hWnd)
 	{
-		paint.endDraw(hWnd);
+		paint->endDraw(hWnd);
+		isDrawing = false;
 		isNeedUpdateMousePos = true;
 		setMousePosition(hWnd);
 	}
 
-	bool isDrawing()
+	bool getDrawing()
 	{
-		return paint.getIsDrawing();
+		return isDrawing;
+	}
+
+	void setColorBrush(DWORD color)
+	{
+		paint->setColor(color);
+	}
+
+	void onClose()
+	{
+		paint->onClose();
 	}
 };

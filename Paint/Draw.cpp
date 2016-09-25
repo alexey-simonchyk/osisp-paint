@@ -8,8 +8,8 @@ private:
 	HDC finalPicture;
 	int hdcWidth;
 	int hdcHeigth;
-	bool isDrawing = false;
-	UINT drawItem;
+	HPEN currentPen;
+	DWORD currentColor;
 
 	void initializeHDC(HWND hWnd)
 	{
@@ -24,13 +24,14 @@ private:
 		hdcHeigth = GetDeviceCaps(hdc, VERTRES);
 		// Drawing HDC //
 		drawingArea = CreateCompatibleDC(hdc);
-		bmDrawingCopy = CreateCompatibleBitmap(drawingArea, hdcWidth, hdcHeigth);
+		bmDrawingCopy = CreateCompatibleBitmap(hdc, hdcWidth, hdcHeigth);
 		SelectObject(drawingArea, bmDrawingCopy);
 		SelectObject(drawingArea, brush);
 		PatBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, PATCOPY);
+
 		// Result HDC //
 		finalPicture = CreateCompatibleDC(hdc);
-		bmFinalCopy = CreateCompatibleBitmap(finalPicture, hdcWidth, hdcHeigth);
+		bmFinalCopy = CreateCompatibleBitmap(hdc, hdcWidth, hdcHeigth);
 		SelectObject(finalPicture, bmFinalCopy);
 		SelectObject(finalPicture, brush);
 		PatBlt(finalPicture, 0, 0, hdcWidth, hdcHeigth, PATCOPY);
@@ -42,48 +43,29 @@ private:
 	}
 
 public:
-	void create(HWND hWnd)
+	Paint(HWND hWnd)
 	{
 		initializeHDC(hWnd);
 	}
 
-	void draw(HDC hdc, int x1, int y1, int x2, int y2)
+	void drawLine(HDC hdc, int x1, int y1, int x2, int y2)
 	{
-		switch (drawItem)
-		{
-			case MENU_PENCIL:
-				line(finalPicture, x1, y1, x2, y2);
-				StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
-				break;
-			case MENU_LINE:
-				StretchBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
-				line(drawingArea, x1, y1, x2, y2);
-				StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
-				break;
-		}
+		StretchBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
+		line(drawingArea, x1, y1, x2, y2);
+		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
+	}
+
+	void drawPencil(HDC hdc, int x1, int y1, int x2, int y2)
+	{
+		line(finalPicture, x1, y1, x2, y2);
+		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
 	}
 
 	void endDraw(HWND hWnd)
 	{
-		isDrawing = false;
 		HDC tempDC = GetDC(hWnd);
 		StretchBlt(finalPicture, 0, 0, hdcWidth, hdcHeigth, tempDC, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
 		ReleaseDC(hWnd, tempDC);
-	}
-
-	void beginDraw()
-	{
-		isDrawing = true;
-	}
-
-	void setDrawItem(UINT drawItem)
-	{
-		this->drawItem = drawItem;
-	}
-
-	UINT getDrawItem()
-	{
-		return drawItem;
 	}
 
 	BOOL line(HDC hdc, int x1, int y1, int x2, int y2)
@@ -92,14 +74,19 @@ public:
 		return LineTo(hdc, x2, y2);
 	}
 
-	bool getIsDrawing()
+	void setColor(DWORD color)
 	{
-		return isDrawing;
+		currentColor = color;
+		currentPen = CreatePen(PS_SOLID, 10, color);
+		SelectObject(finalPicture, currentPen);
+		SelectObject(drawingArea, currentPen);
 	}
 
-	void setIsDrawing(bool isDrawing)
+	void onClose()
 	{
-		this->isDrawing = isDrawing;
+		DeleteObject(currentPen);
+		DeleteObject(drawingArea);
+		DeleteObject(finalPicture);
 	}
 
 };

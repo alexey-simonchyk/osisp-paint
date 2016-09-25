@@ -8,8 +8,11 @@ void MenuCommand(HWND hWnd, WPARAM param);
 void TrackMouse(HWND hwnd);
 UINT CheckDrawItem();
 void OpenFileWindow(HWND hWnd);
+void chooseColor(HWND hWnd);
 HMENU drawItemsMenu;
+HMENU colorMenu;
 int deviceX, deviceY;
+Window *window;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					LPSTR lpCmdLine, int nCmdShow)
@@ -72,12 +75,15 @@ void CreateMainMenu(HWND hWnd)
 	AppendMenu(drawItemsMenu, MF_CHECKED, MENU_PENCIL, L"Pencil");
 	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_LINE, L"Line");
 	AppendMenu(hMenu, MF_POPUP, (UINT)drawItemsMenu, L"Draw Items");
+
+	colorMenu = CreateMenu();
+	AppendMenu(colorMenu, MF_STRING, MENU_COLOR, L"Color");
+	AppendMenu(hMenu, MF_POPUP, (UINT)colorMenu, L"Color");
 	SetMenu(hWnd, hMenu);
 }
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	static Window window;
 	static bool isDrawing = false;
 	HDC hdc;
 	PAINTSTRUCT paintStruct;
@@ -92,33 +98,33 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case WM_CREATE:
 		{
 			CreateMainMenu(hWnd);
-			window.create(hWnd);
+			window = new Window(hWnd);
 			break;
 		}
 
 		case WM_LBUTTONDOWN:
 			
 			drawItem = CheckDrawItem();
-			if (!window.isDrawing())
+			if (!window->getDrawing())
 			{
-				window.setDrawItem(drawItem, hWnd);
+				window->setDrawItem(drawItem, hWnd);
 			}
 			break;
 
 		case WM_MOUSELEAVE:
-			window.endDraw(hWnd);
+			window->endDraw(hWnd);
 			break;
 
 		case WM_LBUTTONUP:
-			window.endDraw(hWnd);
+ 			window->endDraw(hWnd);
 			break;
 
 		case WM_MOUSEMOVE:
 		{
 			TrackMouse(hWnd);
-			window.setMousePosition(hWnd);
-			if (window.isDrawing())
-				window.sendRedrawMsg(hWnd, FALSE);
+			window->setMousePosition(hWnd);
+			if (window->getDrawing())
+				window->sendRedrawMsg(hWnd, FALSE);
 			break;
 		}
 		case WM_COMMAND:
@@ -126,11 +132,12 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_PAINT:
 			hdc = BeginPaint(hWnd, &paintStruct);
-			window.draw(hdc);
+			window->draw(hdc);
 			EndPaint(hWnd, &paintStruct);
 			break;
 
 		case WM_DESTROY:
+			window->onClose();
 			PostQuitMessage(NULL); // send close message
 			break;
 
@@ -174,11 +181,15 @@ void MenuCommand(HWND hWnd, WPARAM param)
 		case MENU_OPEN:
 			//OpenFileWindow(hWnd);
 			break;
+		case MENU_COLOR:
+			chooseColor(hWnd);
+			break;
 		case MENU_CREATE:
 			break;
 		case MENU_SAVE:
 			break;
 		case MENU_EXIT:
+			window->onClose();
 			SendMessage(hWnd, WM_CLOSE, NULL, NULL);
 			break;
 		case MENU_PENCIL:
@@ -191,6 +202,28 @@ void MenuCommand(HWND hWnd, WPARAM param)
 			break;
 
 	}
+}
+
+void chooseColor(HWND hWnd)
+{
+	CHOOSECOLOR chooseColor;
+	static COLORREF choosenColors[16];
+	static DWORD rgbCurrent;
+
+	ZeroMemory(&chooseColor, sizeof(CHOOSECOLOR));
+	chooseColor.lStructSize = sizeof(CHOOSECOLOR);
+	chooseColor.hwndOwner = hWnd;
+	chooseColor.lpCustColors = choosenColors;
+	chooseColor.rgbResult = rgbCurrent;
+
+	chooseColor.Flags = CC_FULLOPEN | CC_RGBINIT;
+
+	if (ChooseColor(&chooseColor) == TRUE)
+	{
+		rgbCurrent = chooseColor.rgbResult;
+		window->setColorBrush(rgbCurrent);
+	}
+
 }
 
 void OpenFileWindow(HWND hWnd)

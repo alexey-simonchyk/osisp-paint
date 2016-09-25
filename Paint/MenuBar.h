@@ -4,3 +4,4 @@
 #define MENU_EXIT 4
 #define MENU_PENCIL 5
 #define MENU_LINE 6
+#define MENU_COLOR 7

@@ -11,3 +11,4 @@
 #define MENU_PENCIL 155
 #define MENU_LINE 156
 #define MENU_COLOR 157
+#define SCROLL_STEP 10

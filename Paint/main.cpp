@@ -12,7 +12,7 @@ void OpenFileWindow(HWND hWnd);
 void chooseColor(HWND hWnd);
 HMENU drawItemsMenu;
 HMENU widthPenMenu;
-Window *window;
+Window *window = NULL;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					LPSTR lpCmdLine, int nCmdShow)
@@ -39,7 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		return NULL;
 	}
 	hMainWindow = CreateWindow(szClassName, L"My Window",
-				WS_OVERLAPPEDWINDOW | WS_VSCROLL,
+		WS_OVERLAPPEDWINDOW | WS_HSCROLL | WS_VSCROLL,
 				CW_USEDEFAULT, NULL,
 				CW_USEDEFAULT, NULL,
 				NULL, NULL,
@@ -97,6 +97,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	HDC hdc;
 	PAINTSTRUCT paintStruct;
 	static UINT drawItem;
+	static int windowWidth;
+	static int windowHeight;
 	
 	switch (uMsg)
 	{
@@ -104,17 +106,42 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			CreateMainMenu(hWnd);
 			window = new Window(hWnd);
+			window->setScrollSize(hWnd, windowWidth, windowHeight);
+			window->sendRedrawMsg(hWnd, FALSE);
 			break;
 		}
 
+		case WM_SIZE:
+			windowWidth = LOWORD(lParam);
+			windowHeight = HIWORD(lParam);
+			if (window != NULL)
+				window->setScrollSize(hWnd, windowWidth, windowHeight);
+			break;
+
 		case WM_MOUSEWHEEL:
-			if ((short)HIWORD(wParam) < 0)
+			if ((short)HIWORD(GetKeyState(VK_CONTROL)))
 			{
-				window->changeZoom(false);
+				if ((short)HIWORD(wParam) < 0)
+				{
+					window->changeZoom(false);
+					window->setScrollSize(hWnd, windowWidth, windowHeight);
+				}
+				else
+				{
+					window->changeZoom(true);
+					window->setScrollSize(hWnd, windowWidth, windowHeight);
+				}
 			}
 			else
 			{
-				window->changeZoom(true);
+				if ((short)HIWORD(wParam) < 0)
+				{
+					window->scrollY(hWnd, false);
+				}
+				else
+				{
+					window->scrollY(hWnd, true);
+				}
 			}
 			window->sendRedrawMsg(hWnd, FALSE);
 			break;
@@ -158,8 +185,13 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			PostQuitMessage(NULL); // send close message
 			break;
 
+		case WM_HSCROLL:
+			window->scrollX(wParam, hWnd);
+			window->sendRedrawMsg(hWnd, FALSE);
+			break;
 		case WM_VSCROLL:
-
+			window->scrollY(wParam, hWnd);
+			window->sendRedrawMsg(hWnd, FALSE);
 			break;
 
 		default:

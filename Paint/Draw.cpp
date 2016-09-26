@@ -3,21 +3,17 @@
 
 #define START_PEN_WIDTH 2
 #define START_PEN_COLOR RGB(0, 0, 0)
-#define ZOOM_STEP 0.5
-#define ZOOM_MAX 9
-#define ZOOM_MIN 1
 
 class Paint
 {
 private:
 	HDC drawingArea;
 	HDC finalPicture;
-	int hdcWidth;
-	int hdcHeigth;
+	int *hdcWidth;
+	int *hdcHeight;
 	HPEN currentPen;
 	DWORD currentColor;
 	int currentPenWidth;
-	double currentZoom;
 
 	void initializeHDC(HWND hWnd)
 	{
@@ -25,24 +21,23 @@ private:
 		HBITMAP bmDrawingCopy;
 		HBRUSH brush;
 		HDC hdc;
+		
 
 		brush = CreateSolidBrush(0xffffff);
 		hdc = GetDC(hWnd);
-		hdcWidth = GetDeviceCaps(hdc, HORZRES);
-		hdcHeigth = GetDeviceCaps(hdc, VERTRES);
 		// Drawing HDC //
 		drawingArea = CreateCompatibleDC(hdc);
-		bmDrawingCopy = CreateCompatibleBitmap(hdc, hdcWidth, hdcHeigth);
+		bmDrawingCopy = CreateCompatibleBitmap(hdc, *hdcWidth, *hdcHeight);
 		SelectObject(drawingArea, bmDrawingCopy);
 		SelectObject(drawingArea, brush);
-		PatBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, PATCOPY);
+		PatBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, PATCOPY);
 
 		// Result HDC //
 		finalPicture = CreateCompatibleDC(hdc);
-		bmFinalCopy = CreateCompatibleBitmap(hdc, hdcWidth, hdcHeigth);
+		bmFinalCopy = CreateCompatibleBitmap(hdc, *hdcWidth, *hdcHeight);
 		SelectObject(finalPicture, bmFinalCopy);
 		SelectObject(finalPicture, brush);
-		PatBlt(finalPicture, 0, 0, hdcWidth, hdcHeigth, PATCOPY);
+		PatBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, PATCOPY);
 
 		ReleaseDC(hWnd, hdc);
 		DeleteObject(brush);
@@ -51,35 +46,37 @@ private:
 	}
 
 public:
-	Paint(HWND hWnd)
+	Paint(HWND hWnd, int *hdcWidth, int *hdcHeight)
 	{
+		this->hdcHeight = hdcHeight;
+		this->hdcWidth = hdcWidth;
 		initializeHDC(hWnd);
 		currentPenWidth = START_PEN_WIDTH;
 		currentColor = START_PEN_COLOR;
 		currentPen = CreatePen(PS_SOLID, currentPenWidth, currentColor);
-		currentZoom = 1;
 		setPen();
 	}
 
-	void drawLine(HDC hdc, int x1, int y1, int x2, int y2)
+	void drawLine(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)
 	{
-		realCoordinates(&x1, &y1, &x2, &y2);
-		StretchBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
+		realCoordinates(&x1, &y1, &x2, &y2, offsetX, offsetY, currentZoom);
+		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 		line(drawingArea, x1, y1, x2, y2);
-		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth / currentZoom, hdcHeigth / currentZoom, SRCCOPY);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
 	}
 
-	void drawPencil(HDC hdc, int x1, int y1, int x2, int y2)
+	void drawPencil(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)
 	{
-		realCoordinates(&x1, &y1, &x2, &y2);
+		realCoordinates(&x1, &y1, &x2, &y2, offsetX, offsetY, currentZoom);
 		line(finalPicture, x1, y1, x2, y2);
-		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth / currentZoom, hdcHeigth / currentZoom, SRCCOPY);
-		StretchBlt(drawingArea, 0, 0, hdcWidth, hdcHeigth, finalPicture, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, finalPicture, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
+	
 
 	void endDraw(HWND hWnd)
 	{
-		StretchBlt(finalPicture, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth, hdcHeigth, SRCCOPY);
+		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
 
 	BOOL line(HDC hdc, int x1, int y1, int x2, int y2)
@@ -109,21 +106,22 @@ public:
 		DeleteObject(finalPicture);
 	}
 
-	void increaseZoom()
+	void updateWindow(HDC hdc, int offsetX, int offsetY, double currentZoom)
 	{
-		if (currentZoom < ZOOM_MAX)
-			currentZoom += ZOOM_STEP;
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
 	}
 
-	void decreaseZoom()
+	void realCoordinates(int *x1, int *y1, int *x2, int *y2, int offsetX, int offsetY, double currentZoom)
 	{
-		if (currentZoom > ZOOM_MIN)
-			currentZoom -= ZOOM_STEP;
-	}
+		*x1 /= currentZoom;
+		*y2 /= currentZoom;
+		*x2 /= currentZoom;
+		*y1 /= currentZoom;
 
-	void updateWindow(HDC hdc)
-	{
-		StretchBlt(hdc, 0, 0, hdcWidth, hdcHeigth, drawingArea, 0, 0, hdcWidth / currentZoom, hdcHeigth / currentZoom, SRCCOPY);
+		*x1 += offsetX;
+		*y2 += offsetY;
+		*x2 += offsetX;
+		*y1 += offsetY;
 	}
 
 private:
@@ -134,13 +132,5 @@ private:
 		DeleteObject(temp);
 		temp = (HPEN)SelectObject(finalPicture, currentPen);
 		DeleteObject(temp);
-	}
-
-	void realCoordinates(int *x1, int *y1, int *x2, int *y2)
-	{
-		*x1 /= currentZoom;
-		*y2 /= currentZoom;
-		*x2 /= currentZoom;
-		*y1 /= currentZoom;
 	}
 };

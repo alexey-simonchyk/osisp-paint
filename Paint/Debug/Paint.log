@@ -1,7 +1,7 @@
-﻿Сборка начата 27.09.2016 1:21:35.
+﻿Сборка начата 27.09.2016 2:40:55.
      1>Проект "E:\Учеба\osisp\Paint\Paint\Paint.vcxproj" в узле 2 (целевые объекты Rebuild).
      1>ClCompile:
-         E:\PRograms\Visual Studio\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Draw.cpp main.cpp Window.cpp
+         E:\PRograms\Visual Studio\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Dialog.cpp Draw.cpp main.cpp Window.cpp
          Window.cpp
      1>e:\учеба\osisp\paint\paint\draw.cpp(65): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
      1>e:\учеба\osisp\paint\paint\draw.cpp(72): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
@@ -34,9 +34,13 @@
      1>e:\учеба\osisp\paint\paint\draw.cpp(117): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
      1>e:\учеба\osisp\paint\paint\draw.cpp(118): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
      1>e:\учеба\osisp\paint\paint\draw.cpp(119): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+         Dialog.cpp
          Создание кода...
+     1>e:\учеба\osisp\paint\paint\dialog.cpp(32): warning C4715: Dialog::OpenFileDialog: значение возвращается не при всех путях выполнения
+     1>e:\учеба\osisp\paint\paint\dialog.cpp(46): warning C4715: Dialog::OpenSaveDialog: значение возвращается не при всех путях выполнения
        Link:
-         E:\PRograms\Visual Studio\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Учеба\osisp\Paint\Debug\Paint.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\Учеба\osisp\Paint\Debug\Paint.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Учеба\osisp\Paint\Debug\Paint.lib" /MACHINE:X86 Debug\Draw.obj
+         E:\PRograms\Visual Studio\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"E:\Учеба\osisp\Paint\Debug\Paint.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"E:\Учеба\osisp\Paint\Debug\Paint.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"E:\Учеба\osisp\Paint\Debug\Paint.lib" /MACHINE:X86 Debug\Dialog.obj
+         Debug\Draw.obj
          Debug\main.obj
          Debug\Window.obj
          Paint.vcxproj -> E:\Учеба\osisp\Paint\Debug\Paint.exe
@@ -44,4 +48,4 @@
 
 Сборка успешно завершена.
 
-Затраченное время: 00:00:06.22
+Затраченное время: 00:00:05.19

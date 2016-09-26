@@ -76,6 +76,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Dialog.cpp" />
     <ClCompile Include="Draw.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Window.cpp" />

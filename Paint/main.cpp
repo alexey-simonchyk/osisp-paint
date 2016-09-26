@@ -2,13 +2,14 @@
 #include <iostream>
 #include "MenuBar.h"
 #include "Window.cpp"
+#include "Dialog.cpp"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); // message handler
 void MenuCommand(HWND hWnd, WPARAM param);
 void setChoosenWidth(int choosenWidth);
 void TrackMouse(HWND hwnd);
 UINT CheckDrawItem();
-void OpenFileWindow(HWND hWnd);
+void OpenFileDialog(HWND hwnd, bool isOpenFile);
 void chooseColor(HWND hWnd);
 HMENU drawItemsMenu;
 HMENU widthPenMenu;
@@ -232,7 +233,7 @@ void MenuCommand(HWND hWnd, WPARAM param)
 	switch (param)
 	{
 		case MENU_OPEN:
-			//OpenFileWindow(hWnd);
+			OpenFileDialog(hWnd, true);
 			break;
 		case MENU_COLOR:
 			chooseColor(hWnd);
@@ -240,6 +241,7 @@ void MenuCommand(HWND hWnd, WPARAM param)
 		case MENU_CREATE:
 			break;
 		case MENU_SAVE:
+			OpenFileDialog(hWnd, false);
 			break;
 		case MENU_EXIT:
 			window->onClose();
@@ -292,25 +294,32 @@ void chooseColor(HWND hWnd)
 
 }
 
-void OpenFileWindow(HWND hWnd)
+void OpenFileDialog(HWND hwnd, bool isOpenFile)
 {
-	TCHAR szFile[260];
-	OPENFILENAME ofn;
-	ofn.lStructSize = sizeof(ofn);
-	ofn.hwndOwner = hWnd;
-	ofn.lpstrFile = szFile;
-	ofn.nMaxFile = sizeof(szFile);
-	ofn.lpstrFilter = L"All\0*.*\0Text\0*.TXT\0";
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+	Dialog *dialog = new Dialog();
+	bool temp = false;
+	LPWSTR filePath;
+	if (isOpenFile)
+	{
+		filePath = dialog->OpenFileDialog(&temp);
+	}
+	else
+	{
+		filePath = dialog->OpenSaveDialog(&temp);
+	}
+	delete dialog;
 
-	HANDLE handle;
 
-	if (GetOpenFileName(&ofn) == TRUE)
-		handle = CreateFile(ofn.lpstrFile, GENERIC_READ,
-		0, (LPSECURITY_ATTRIBUTES)NULL,
-		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL,
-		(HANDLE)NULL);
+	/*
+		HENHMETAFILE henHMetaFile = GetEnhMetaFile(openFileName.lpstrFile);
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+		PlayEnhMetaFile(hdc, henHMetaFile, &rect);
+
+		StretchBlt(memDC, 0, 0, GetDeviceCaps(hdc, HORZRES),
+			GetDeviceCaps(hdc, VERTRES), memDC, 0, 0,
+			GetDeviceCaps(memDC, HORZRES), GetDeviceCaps(memDC, VERTRES), SRCCOPY);
+
+		DeleteEnhMetaFile(henHMetaFile);
+		*/
 }

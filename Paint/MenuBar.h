@@ -12,3 +12,4 @@
 #define MENU_LINE 156
 #define MENU_COLOR 157
 #define SCROLL_STEP 10
+#define MENU_RECTANGLE 158

@@ -76,6 +76,7 @@ void CreateMainMenu(HWND hWnd)
 	drawItemsMenu = CreateMenu();
 	AppendMenu(drawItemsMenu, MF_CHECKED, MENU_PENCIL, L"Pencil");
 	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_LINE, L"Line");
+	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_RECTANGLE, L"Rectangle");
 	AppendMenu(hMenu, MF_POPUP, (UINT)drawItemsMenu, L"Draw Items");
 
 	widthPenMenu = CreateMenu();
@@ -204,17 +205,16 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 UINT CheckDrawItem()
 {
-	UINT drawItem;
 	UINT temp = GetMenuState(drawItemsMenu, MENU_PENCIL, MF_BYCOMMAND);
 	if (temp & MF_CHECKED)
-	{
-		drawItem = MENU_PENCIL;
-	}
-	else
-	{
-		drawItem = MENU_LINE;
-	}
-	return drawItem;
+		return MENU_PENCIL;
+	temp = GetMenuState(drawItemsMenu, MENU_LINE, MF_BYCOMMAND);
+	if (temp & MF_CHECKED)
+		return MENU_LINE;
+	temp = GetMenuState(drawItemsMenu, MENU_RECTANGLE, MF_BYCOMMAND);
+	if (temp & MF_CHECKED)
+		return MENU_RECTANGLE;
+	return 0;
 }
 
 
@@ -240,6 +240,11 @@ void MenuCommand(HWND hWnd, WPARAM param)
 			break;
 		case MENU_CREATE:
 			break;
+		case MENU_RECTANGLE:
+			CheckMenuItem(drawItemsMenu, MENU_RECTANGLE, MF_CHECKED);
+			CheckMenuItem(drawItemsMenu, MENU_PENCIL, MF_UNCHECKED);
+			CheckMenuItem(drawItemsMenu, MENU_LINE, MF_UNCHECKED);
+			break;
 		case MENU_SAVE:
 			OpenFileDialog(hWnd, false);
 			break;
@@ -250,13 +255,15 @@ void MenuCommand(HWND hWnd, WPARAM param)
 		case MENU_PENCIL:
 			CheckMenuItem(drawItemsMenu, MENU_PENCIL, MF_CHECKED);
 			CheckMenuItem(drawItemsMenu, MENU_LINE, MF_UNCHECKED);
+			CheckMenuItem(drawItemsMenu, MENU_RECTANGLE, MF_UNCHECKED);
 			break;
 		case MENU_LINE:
 			CheckMenuItem(drawItemsMenu, MENU_PENCIL, MF_UNCHECKED);
 			CheckMenuItem(drawItemsMenu, MENU_LINE, MF_CHECKED);
+			CheckMenuItem(drawItemsMenu, MENU_RECTANGLE, MF_UNCHECKED);
 			break;
 		default:
-			if (param <= MENU_WIDTH_6 || param >= MENU_WIDTH_1)
+			if (param <= MENU_WIDTH_6 && param >= MENU_WIDTH_1)
 			{
 				setChoosenWidth(param);
 				window->setPenWidth(param);

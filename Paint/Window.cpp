@@ -77,6 +77,9 @@ public:
 			case MENU_PENCIL:
 				paint->drawPencil(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
 				break;
+			case MENU_RECTANGLE:
+				paint->drawRectangle(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
+				break;
 		}
 	}
 

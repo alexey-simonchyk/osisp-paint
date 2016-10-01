@@ -1,39 +1,42 @@
-﻿Сборка начата 01.10.2016 21:15:10.
+﻿Сборка начата 02.10.2016 0:56:05.
      1>Проект "E:\Учеба\osisp\Paint\Paint\Paint.vcxproj" в узле 2 (целевые объекты Rebuild).
      1>ClCompile:
          E:\PRograms\Visual Studio\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt Dialog.cpp Draw.cpp main.cpp Window.cpp
          Window.cpp
-     1>e:\учеба\osisp\paint\paint\draw.cpp(66): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(74): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(113): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(128): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(129): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(130): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(131): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\window.cpp(128): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\window.cpp(129): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\window.cpp(130): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(68): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(76): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(90): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(127): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(142): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(143): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(144): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(145): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
      1>e:\учеба\osisp\paint\paint\window.cpp(131): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\window.cpp(132): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\window.cpp(133): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\window.cpp(134): warning C4244: =: преобразование "double" в "int", возможна потеря данных
          main.cpp
-     1>e:\учеба\osisp\paint\paint\draw.cpp(66): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(74): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(113): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(128): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(129): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(130): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(131): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\window.cpp(128): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\window.cpp(129): warning C4244: =: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\window.cpp(130): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(68): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(76): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(90): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(127): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(142): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(143): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(144): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(145): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
      1>e:\учеба\osisp\paint\paint\window.cpp(131): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\window.cpp(132): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\window.cpp(133): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\window.cpp(134): warning C4244: =: преобразование "double" в "int", возможна потеря данных
          Draw.cpp
-     1>e:\учеба\osisp\paint\paint\draw.cpp(66): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(74): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(113): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(128): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(129): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(130): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
-     1>e:\учеба\osisp\paint\paint\draw.cpp(131): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(68): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(76): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(90): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(127): warning C4244: аргумент: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(142): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(143): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(144): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
+     1>e:\учеба\osisp\paint\paint\draw.cpp(145): warning C4244: /=: преобразование "double" в "int", возможна потеря данных
          Dialog.cpp
          Создание кода...
        Link:
@@ -46,4 +49,4 @@
 
 Сборка успешно завершена.
 
-Затраченное время: 00:00:05.96
+Затраченное время: 00:00:05.52

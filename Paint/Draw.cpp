@@ -14,6 +14,7 @@ private:
 	HPEN currentPen;
 	DWORD currentColor;
 	int currentPenWidth;
+	POINT *points;
 
 	void initializeHDC(HWND hWnd)
 	{
@@ -30,7 +31,8 @@ private:
 		drawingArea = CreateCompatibleDC(hdc);
 		bmDrawingCopy = CreateCompatibleBitmap(hdc, *hdcWidth, *hdcHeight);
 		SelectObject(drawingArea, bmDrawingCopy);
-		SelectObject(drawingArea, brush);
+		HBRUSH temp = (HBRUSH)SelectObject(drawingArea, GetStockObject(HOLLOW_BRUSH));
+		DeleteObject(temp);
 		PatBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, PATCOPY);
 
 		// Result HDC //
@@ -74,7 +76,19 @@ public:
 		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
 		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
+
+	void drawPolyLine()
+	{
+
+	}
 	
+	void drawRectangle(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)
+	{
+		realCoordinates(&x1, &y1, &x2, &y2, offsetX, offsetY, currentZoom);
+		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
+		Rectangle(drawingArea, x1, y1, x2, y2);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+	}
 
 	void endDraw()
 	{

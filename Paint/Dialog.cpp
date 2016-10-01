@@ -5,9 +5,9 @@ class Dialog
 private:
 	OPENFILENAME fileNameStructure;
 public:
-	Dialog()
+
+	void init(char *szFileName)
 	{
-		char szFileName[MAX_PATH] = "";
 		ZeroMemory(&fileNameStructure, sizeof(fileNameStructure));
 		fileNameStructure.lStructSize = sizeof(fileNameStructure);
 		fileNameStructure.hwndOwner = NULL;
@@ -18,30 +18,31 @@ public:
 		fileNameStructure.lpstrDefExt = (LPCWSTR)L"emf";
 	}
 
-	LPWSTR OpenFileDialog(bool *isSelected)
+	LPWSTR OpenFileDialog(char* szFileName)
 	{
+		init(szFileName);
 		if (GetOpenFileName(&fileNameStructure) == TRUE)
 		{
-			*isSelected = true;
+		fileNameStructure.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 			return fileNameStructure.lpstrFile;
 		}
 		else
 		{
-			*isSelected = false;
+			return NULL;
 		}
 	}
 
-	LPWSTR OpenSaveDialog(bool *isSelected)
+	LPWSTR OpenSaveDialog(char* szFileName)
 	{
+		init(szFileName);
 		if (GetSaveFileName(&fileNameStructure) == TRUE)
 		{
-			*isSelected = true;
 			return fileNameStructure.lpstrFile;
 
 		}
 		else
 		{
-			*isSelected = false;
+			return NULL;
 		}
 	}
 };

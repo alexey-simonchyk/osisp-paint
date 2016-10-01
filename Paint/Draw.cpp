@@ -25,6 +25,7 @@ private:
 
 		brush = CreateSolidBrush(0xffffff);
 		hdc = GetDC(hWnd);
+
 		// Drawing HDC //
 		drawingArea = CreateCompatibleDC(hdc);
 		bmDrawingCopy = CreateCompatibleBitmap(hdc, *hdcWidth, *hdcHeight);
@@ -62,19 +63,20 @@ public:
 		realCoordinates(&x1, &y1, &x2, &y2, offsetX, offsetY, currentZoom);
 		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 		line(drawingArea, x1, y1, x2, y2);
-		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
 	}
 
 	void drawPencil(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)
 	{
 		realCoordinates(&x1, &y1, &x2, &y2, offsetX, offsetY, currentZoom);
-		line(finalPicture, x1, y1, x2, y2);
-		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, finalPicture, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
 		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
+		line(drawingArea, x1, y1, x2, y2);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
 	
 
-	void endDraw(HWND hWnd)
+	void endDraw()
 	{
 		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
@@ -108,7 +110,17 @@ public:
 
 	void updateWindow(HDC hdc, int offsetX, int offsetY, double currentZoom)
 	{
-		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, finalPicture, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+	}
+
+	void setBufferHDC(HENHMETAFILE henHMetaFile, RECT *rect)
+	{
+		PlayEnhMetaFile(drawingArea, henHMetaFile, rect);
+	}
+
+	void saveBufferHDC(HDC hdc)
+	{
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcWidth, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
 
 	void realCoordinates(int *x1, int *y1, int *x2, int *y2, int offsetX, int offsetY, double currentZoom)

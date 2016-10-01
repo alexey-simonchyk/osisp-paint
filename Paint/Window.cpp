@@ -90,7 +90,7 @@ public:
 
 	void endDraw(HWND hWnd, LPARAM lParam)
 	{
-		paint->endDraw(hWnd);
+		paint->endDraw();
 		isDrawing = false;
 		isNeedUpdateMousePos = true;
 		setMousePosition(hWnd);
@@ -220,6 +220,46 @@ public:
 	}
 
 
+	void saveToFile(HWND hWnd, LPWSTR filePath)
+	{
+
+		HDC hdc = GetDC(hWnd);
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		
+		int iWidthMM = GetDeviceCaps(hdc, HORZSIZE);
+		int iHeightMM = GetDeviceCaps(hdc, VERTSIZE);
+		int iWidthPels = GetDeviceCaps(hdc, HORZRES);
+		int iHeightPels = GetDeviceCaps(hdc, VERTRES);
+		rect.left = (rect.left * iWidthMM * 100) / iWidthPels;
+		rect.top = (rect.top * iHeightMM * 100) / iHeightPels;
+		rect.right = (rect.right * iWidthMM * 100) / iWidthPels;
+		rect.bottom = (rect.bottom * iHeightMM * 100) / iHeightPels;
+
+		HDC enhHDC = CreateEnhMetaFile(hdc, filePath, &rect, L"iPaint EMF file\0");
+		if (!enhHDC)
+		{
+			MessageBox(NULL, L"Error creating file", L"Error", MB_OK);
+		}
+		paint->saveBufferHDC(enhHDC);
+		SetMapMode(enhHDC, MM_ANISOTROPIC);
+		HENHMETAFILE enhFile = CloseEnhMetaFile(enhHDC);
+		ReleaseDC(hWnd, hdc);
+	}
+
+	void openFile(HWND hWnd, LPWSTR filePath)
+	{
+		HENHMETAFILE henHMetaFile = GetEnhMetaFile(filePath);
+		RECT rect;
+		GetClientRect(hWnd, &rect);
+		paint->setBufferHDC(henHMetaFile, &rect);
+		DeleteEnhMetaFile(henHMetaFile);
+		HDC hdc = GetDC(hWnd);
+		paint->endDraw();
+		sendRedrawMsg(hWnd, FALSE);
+		ReleaseDC(hWnd, hdc);
+	}
+
 private: 
 
 
@@ -275,4 +315,5 @@ private:
 			SW_INVALIDATE);
 		sendRedrawMsg(hWnd, FALSE);
 	}
+
 };

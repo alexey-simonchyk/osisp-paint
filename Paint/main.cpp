@@ -294,32 +294,23 @@ void chooseColor(HWND hWnd)
 
 }
 
-void OpenFileDialog(HWND hwnd, bool isOpenFile)
+void OpenFileDialog(HWND hWnd, bool isOpenFile)
 {
 	Dialog *dialog = new Dialog();
 	bool temp = false;
+	char szFileName[MAX_PATH] = "";
 	LPWSTR filePath;
 	if (isOpenFile)
 	{
-		filePath = dialog->OpenFileDialog(&temp);
+		filePath = dialog->OpenFileDialog(szFileName);
+		window->openFile(hWnd, filePath);
 	}
 	else
 	{
-		filePath = dialog->OpenSaveDialog(&temp);
+		filePath = dialog->OpenSaveDialog(szFileName);
+		window->saveToFile(hWnd, filePath);
 	}
 	delete dialog;
 
-
-	/*
-		HENHMETAFILE henHMetaFile = GetEnhMetaFile(openFileName.lpstrFile);
-		RECT rect;
-		GetClientRect(hwnd, &rect);
-		PlayEnhMetaFile(hdc, henHMetaFile, &rect);
-
-		StretchBlt(memDC, 0, 0, GetDeviceCaps(hdc, HORZRES),
-			GetDeviceCaps(hdc, VERTRES), memDC, 0, 0,
-			GetDeviceCaps(memDC, HORZRES), GetDeviceCaps(memDC, VERTRES), SRCCOPY);
-
-		DeleteEnhMetaFile(henHMetaFile);
-		*/
+	
 }

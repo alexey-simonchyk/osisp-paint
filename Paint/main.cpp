@@ -196,6 +196,11 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				window->endDraw(hWnd);
 				window->endPrintText();
 			}
+			else if (drawItem == MENU_POLY_LINE)
+			{
+				window->endDraw(hWnd);
+				window->setDrawItem(drawItem, hWnd);
+			}
 			break;
 
 		case WM_MOUSEMOVE:

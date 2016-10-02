@@ -85,6 +85,9 @@ public:
 		case MENU_ELLIPSE:
 			paint->drawEllipse(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
 			break;
+		case MENU_POLY_LINE:
+			paint->drawLine(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
+			break;
 		}
 	}
 

@@ -164,7 +164,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				if (drawItem == MENU_TEXT)
 				{
+					window->endDraw(hWnd);
 					window->saveMousePosition(hWnd);
+					window->setDrawItem(MENU_TEXT, hWnd);
 					window->endPrintText();
 				}
 			}

@@ -54,14 +54,7 @@ private:
 		temp = (HBRUSH)SelectObject(drawingArea, GetStockObject(HOLLOW_BRUSH));
 		DeleteObject(temp);
 
-		HFONT hFont, oldFont;
-		hFont = CreateFont(90, 0, 0, 0, 0, 0, 0, 0,
-			DEFAULT_CHARSET,
-			0, 0, 0, 0,
-			L"Arial Bold"
-			);
-		oldFont = (HFONT)SelectObject(drawingArea, hFont);
-		DeleteObject(oldFont);
+		SetBkMode(drawingArea, TRANSPARENT);
 	}
 
 public:
@@ -104,15 +97,27 @@ public:
 
 	void drawText(HDC hdc, int x1, int y1, int offsetX, int offsetY, int currentZoom, wchar_t symbol)
 	{
-		wchar_t *text = new wchar_t[++textLenght + 1];
-		if (textLenght < MAX_TEXT_LENGHT)
+		wchar_t *text;
+		if (symbol == VK_BACK)
 		{
-			bufferedText[textLenght - 1] = symbol;
-			bufferedText[textLenght] = '\0';
+			text = new wchar_t[--textLenght + 1];
+			if (textLenght < 0)
+			{
+				textLenght = 0;
+			}
 		}
 		else
 		{
-			textLenght--;
+			text = new wchar_t[++textLenght + 1];
+			if (textLenght < MAX_TEXT_LENGHT)
+			{
+				bufferedText[textLenght - 1] = symbol;
+				bufferedText[textLenght] = '\0';
+			}
+			else
+			{
+				textLenght--;
+			}
 		}
 		for (int i = 0; i <= textLenght ; i++)
 		{
@@ -123,7 +128,6 @@ public:
 		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 		TextOut(drawingArea, x1, y1, text, textLenght);
 		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
-		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
 	
 	void drawRectangle(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)

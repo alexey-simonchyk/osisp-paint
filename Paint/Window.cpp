@@ -12,7 +12,8 @@ private:
 	Paint *paint;
 	POINT mousePosition;
 	POINT previousMousePosition;
-	bool isNeedUpdateMousePos  = true;
+	POINT savedPosition;
+	bool isNeedUpdateMousePos = true;
 	bool isDrawing;
 	UINT currentDrawItem;
 
@@ -26,8 +27,9 @@ private:
 	int hdcWidth;
 	int hdcHeight;
 	SCROLLINFO scrollInfo;
+	char* textBuffer;
 
-	
+
 public:
 
 	Window(HWND hWnd)
@@ -40,7 +42,7 @@ public:
 		hdcWidth = GetDeviceCaps(hdc, HORZRES);
 		hdcHeight = GetDeviceCaps(hdc, VERTRES);
 		ReleaseDC(hWnd, hdc);
-		
+
 		paint = new Paint(hWnd, &hdcWidth, &hdcHeight);
 
 	}
@@ -71,16 +73,36 @@ public:
 		}
 		switch (currentDrawItem)
 		{
-			case MENU_LINE:
-				paint->drawLine(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
-				break;
-			case MENU_PENCIL:
-				paint->drawPencil(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
-				break;
-			case MENU_RECTANGLE:
-				paint->drawRectangle(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
-				break;
+		case MENU_LINE:
+			paint->drawLine(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
+			break;
+		case MENU_PENCIL:
+			paint->drawPencil(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
+			break;
+		case MENU_RECTANGLE:
+			paint->drawRectangle(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
+			break;
+		case MENU_ELLIPSE:
+			paint->drawEllipse(hdc, mousePosition.x, mousePosition.y, previousMousePosition.x, previousMousePosition.y, offsetX, offsetY, currentZoom);
+			break;
 		}
+	}
+
+	void printText(HDC hdc, wchar_t symbol)
+	{
+		if (isDrawing)
+			paint->drawText(hdc, savedPosition.x, savedPosition.y, offsetX, offsetY, currentZoom, symbol);
+	}
+
+	void endPrintText()
+	{
+		paint->clearTextBuffer();
+	}
+
+	void saveMousePosition(HWND hWnd)
+	{
+		GetCursorPos(&savedPosition);
+		ScreenToClient(hWnd, &savedPosition);
 	}
 
 	void setDrawItem(UINT drawItem, HWND hWnd)
@@ -91,7 +113,7 @@ public:
 		isDrawing = true;
 	}
 
-	void endDraw(HWND hWnd, LPARAM lParam)
+	void endDraw(HWND hWnd)
 	{
 		paint->endDraw();
 		isDrawing = false;

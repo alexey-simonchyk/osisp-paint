@@ -5,12 +5,13 @@
 #include "Dialog.cpp"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); // message handler
-void MenuCommand(HWND hWnd, WPARAM param);
+void MenuCommand(HWND hWnd, WPARAM param, int drawItem);
 void setChoosenWidth(int choosenWidth);
 void TrackMouse(HWND hwnd);
 UINT CheckDrawItem();
 void OpenFileDialog(HWND hwnd, bool isOpenFile);
 void chooseColor(HWND hWnd);
+void setDrawItem(int newDrawItem, int drawItem);
 HMENU drawItemsMenu;
 HMENU widthPenMenu;
 Window *window = NULL;
@@ -77,6 +78,9 @@ void CreateMainMenu(HWND hWnd)
 	AppendMenu(drawItemsMenu, MF_CHECKED, MENU_PENCIL, L"Pencil");
 	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_LINE, L"Line");
 	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_RECTANGLE, L"Rectangle");
+	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_ELLIPSE, L"Ellipse");
+	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_POLY_LINE, L"Poly line");
+	AppendMenu(drawItemsMenu, MF_UNCHECKED, MENU_TEXT, L"Text");
 	AppendMenu(hMenu, MF_POPUP, (UINT)drawItemsMenu, L"Draw Items");
 
 	widthPenMenu = CreateMenu();
@@ -110,6 +114,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			window = new Window(hWnd);
 			window->setScrollSize(hWnd, windowWidth, windowHeight);
 			window->sendRedrawMsg(hWnd, FALSE);
+			drawItem = MENU_PENCIL;
 			break;
 		}
 
@@ -155,26 +160,56 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				window->setDrawItem(drawItem, hWnd);
 			}
+			else
+			{
+				if (drawItem == MENU_TEXT)
+				{
+					window->saveMousePosition(hWnd);
+					window->endPrintText();
+				}
+			}
 			break;
 
 		case WM_MOUSELEAVE:
-			window->endDraw(hWnd, lParam);
+			window->endDraw(hWnd);
+			break;
+
+		case WM_KEYDOWN:
+			if (window->getDrawing())
+			{
+				hdc = GetDC(hWnd);
+				window->printText(hdc, (wchar_t)wParam);
+				ReleaseDC(hWnd, hdc);
+			}
 			break;
 
 		case WM_LBUTTONUP:
-			window->endDraw(hWnd, lParam);
+			if (drawItem != MENU_TEXT)
+				window->endDraw(hWnd);
+			break;
+
+		case WM_RBUTTONDOWN:
+			if (drawItem == MENU_TEXT)
+			{
+				window->endDraw(hWnd);
+				window->endPrintText();
+			}
 			break;
 
 		case WM_MOUSEMOVE:
 		{
-			TrackMouse(hWnd);
-			window->setMousePosition(hWnd);
-			if (window->getDrawing())
-				window->sendRedrawMsg(hWnd, FALSE);
+			if (drawItem != MENU_TEXT)
+			{
+				TrackMouse(hWnd);
+				window->setMousePosition(hWnd);
+				if (window->getDrawing())
+					window->sendRedrawMsg(hWnd, FALSE);
+			}
 			break;
 		}
 		case WM_COMMAND:
-			MenuCommand(hWnd, wParam);
+			MenuCommand(hWnd, wParam, drawItem);
+			window->endDraw(hWnd);
 			break;
 		case WM_PAINT:
 			hdc = BeginPaint(hWnd, &paintStruct);
@@ -214,6 +249,15 @@ UINT CheckDrawItem()
 	temp = GetMenuState(drawItemsMenu, MENU_RECTANGLE, MF_BYCOMMAND);
 	if (temp & MF_CHECKED)
 		return MENU_RECTANGLE;
+	temp = GetMenuState(drawItemsMenu, MENU_TEXT, MF_BYCOMMAND);
+	if (temp & MF_CHECKED)
+		return MENU_TEXT;
+	temp = GetMenuState(drawItemsMenu, MENU_ELLIPSE, MF_BYCOMMAND);
+	if (temp & MF_CHECKED)
+		return MENU_ELLIPSE;
+	temp = GetMenuState(drawItemsMenu, MENU_POLY_LINE, MF_BYCOMMAND);
+	if (temp & MF_CHECKED)
+		return MENU_POLY_LINE;
 	return 0;
 }
 
@@ -228,7 +272,7 @@ void TrackMouse(HWND hWnd) // detect mouse left the window
 	TrackMouseEvent(&tme);
 }
 
-void MenuCommand(HWND hWnd, WPARAM param)
+void MenuCommand(HWND hWnd, WPARAM param, int drawItem)
 {
 	switch (param)
 	{
@@ -241,9 +285,7 @@ void MenuCommand(HWND hWnd, WPARAM param)
 		case MENU_CREATE:
 			break;
 		case MENU_RECTANGLE:
-			CheckMenuItem(drawItemsMenu, MENU_RECTANGLE, MF_CHECKED);
-			CheckMenuItem(drawItemsMenu, MENU_PENCIL, MF_UNCHECKED);
-			CheckMenuItem(drawItemsMenu, MENU_LINE, MF_UNCHECKED);
+			setDrawItem(MENU_RECTANGLE, drawItem);
 			break;
 		case MENU_SAVE:
 			OpenFileDialog(hWnd, false);
@@ -253,14 +295,21 @@ void MenuCommand(HWND hWnd, WPARAM param)
 			SendMessage(hWnd, WM_CLOSE, NULL, NULL);
 			break;
 		case MENU_PENCIL:
-			CheckMenuItem(drawItemsMenu, MENU_PENCIL, MF_CHECKED);
-			CheckMenuItem(drawItemsMenu, MENU_LINE, MF_UNCHECKED);
-			CheckMenuItem(drawItemsMenu, MENU_RECTANGLE, MF_UNCHECKED);
+			setDrawItem(MENU_PENCIL, drawItem);
 			break;
 		case MENU_LINE:
-			CheckMenuItem(drawItemsMenu, MENU_PENCIL, MF_UNCHECKED);
-			CheckMenuItem(drawItemsMenu, MENU_LINE, MF_CHECKED);
-			CheckMenuItem(drawItemsMenu, MENU_RECTANGLE, MF_UNCHECKED);
+			setDrawItem(MENU_LINE, drawItem);
+			break;
+		case MENU_ELLIPSE:
+			setDrawItem(MENU_ELLIPSE, drawItem);
+			break;
+		case MENU_TEXT:
+			setDrawItem(MENU_TEXT, drawItem);
+			window->setDrawItem(MENU_TEXT, hWnd);
+			window->saveMousePosition(hWnd);
+			break;
+		case MENU_POLY_LINE:
+			setDrawItem(MENU_POLY_LINE, drawItem);
 			break;
 		default:
 			if (param <= MENU_WIDTH_6 && param >= MENU_WIDTH_1)
@@ -269,6 +318,12 @@ void MenuCommand(HWND hWnd, WPARAM param)
 				window->setPenWidth(param);
 			}
 	}
+}
+
+void setDrawItem(int newDrawItem, int drawItem)
+{
+	CheckMenuItem(drawItemsMenu, newDrawItem, MF_CHECKED);
+	CheckMenuItem(drawItemsMenu, drawItem, MF_UNCHECKED);
 }
 
 void setChoosenWidth(int choosenWidth)

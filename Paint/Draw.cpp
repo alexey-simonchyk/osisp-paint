@@ -3,6 +3,7 @@
 
 #define START_PEN_WIDTH 2
 #define START_PEN_COLOR RGB(0, 0, 0)
+#define MAX_TEXT_LENGHT 19
 
 class Paint
 {
@@ -15,6 +16,8 @@ private:
 	DWORD currentColor;
 	int currentPenWidth;
 	POINT *points;
+	wchar_t bufferedText[MAX_TEXT_LENGHT + 1];
+	int textLenght;
 
 	void initializeHDC(HWND hWnd)
 	{
@@ -22,6 +25,7 @@ private:
 		HBITMAP bmDrawingCopy;
 		HBRUSH brush;
 		HDC hdc;
+		HBRUSH temp;
 		
 
 		brush = CreateSolidBrush(0xffffff);
@@ -31,7 +35,7 @@ private:
 		drawingArea = CreateCompatibleDC(hdc);
 		bmDrawingCopy = CreateCompatibleBitmap(hdc, *hdcWidth, *hdcHeight);
 		SelectObject(drawingArea, bmDrawingCopy);
-		HBRUSH temp = (HBRUSH)SelectObject(drawingArea, GetStockObject(HOLLOW_BRUSH));
+		temp = (HBRUSH)SelectObject(drawingArea, brush);
 		DeleteObject(temp);
 		PatBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, PATCOPY);
 
@@ -39,13 +43,25 @@ private:
 		finalPicture = CreateCompatibleDC(hdc);
 		bmFinalCopy = CreateCompatibleBitmap(hdc, *hdcWidth, *hdcHeight);
 		SelectObject(finalPicture, bmFinalCopy);
-		SelectObject(finalPicture, brush);
+		temp = (HBRUSH)SelectObject(finalPicture, brush);
+		DeleteObject(temp);
 		PatBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, PATCOPY);
 
 		ReleaseDC(hWnd, hdc);
 		DeleteObject(brush);
 		DeleteObject(bmDrawingCopy);
 		DeleteObject(bmFinalCopy);
+		temp = (HBRUSH)SelectObject(drawingArea, GetStockObject(HOLLOW_BRUSH));
+		DeleteObject(temp);
+
+		HFONT hFont, oldFont;
+		hFont = CreateFont(90, 0, 0, 0, 0, 0, 0, 0,
+			DEFAULT_CHARSET,
+			0, 0, 0, 0,
+			L"Arial Bold"
+			);
+		oldFont = (HFONT)SelectObject(drawingArea, hFont);
+		DeleteObject(oldFont);
 	}
 
 public:
@@ -58,6 +74,7 @@ public:
 		currentColor = START_PEN_COLOR;
 		currentPen = CreatePen(PS_SOLID, currentPenWidth, currentColor);
 		setPen();
+		textLenght = 0;
 	}
 
 	void drawLine(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)
@@ -77,9 +94,36 @@ public:
 		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
 
-	void drawPolyLine()
+	void drawEllipse(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)
 	{
+		realCoordinates(&x1, &y1, &x2, &y2, offsetX, offsetY, currentZoom);
+		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
+		Ellipse(drawingArea, x1, y1, x2, y2);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+	}
 
+	void drawText(HDC hdc, int x1, int y1, int offsetX, int offsetY, int currentZoom, wchar_t symbol)
+	{
+		wchar_t *text = new wchar_t[++textLenght + 1];
+		if (textLenght < MAX_TEXT_LENGHT)
+		{
+			bufferedText[textLenght - 1] = symbol;
+			bufferedText[textLenght] = '\0';
+		}
+		else
+		{
+			textLenght--;
+		}
+		for (int i = 0; i <= textLenght ; i++)
+		{
+			text[i] = bufferedText[i];
+		}
+		realCoordinates(&x1, &y1, offsetX, offsetY, currentZoom);
+		SetTextColor(hdc, currentColor);
+		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
+		TextOut(drawingArea, x1, y1, text, textLenght);
+		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);
+		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
 	
 	void drawRectangle(HDC hdc, int x1, int y1, int x2, int y2, int offsetX, int offsetY, double currentZoom)
@@ -93,6 +137,11 @@ public:
 	void endDraw()
 	{
 		StretchBlt(finalPicture, 0, 0, *hdcWidth, *hdcHeight, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
+	}
+
+	void clearTextBuffer()
+	{
+		textLenght = 0;
 	}
 
 	BOOL line(HDC hdc, int x1, int y1, int x2, int y2)
@@ -147,6 +196,15 @@ public:
 		*x1 += offsetX;
 		*y2 += offsetY;
 		*x2 += offsetX;
+		*y1 += offsetY;
+	}
+
+	void realCoordinates(int *x1, int *y1, int offsetX, int offsetY, double currentZoom)
+	{
+		*x1 /= currentZoom;
+		*y1 /= currentZoom;
+
+		*x1 += offsetX;
 		*y1 += offsetY;
 	}
 

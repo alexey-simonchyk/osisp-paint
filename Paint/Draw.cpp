@@ -3,7 +3,7 @@
 
 #define START_PEN_WIDTH 2
 #define START_PEN_COLOR RGB(0, 0, 0)
-#define MAX_TEXT_LENGHT 19
+#define MAX_TEXT_LENGHT 29
 
 class Paint
 {
@@ -124,7 +124,7 @@ public:
 			text[i] = bufferedText[i];
 		}
 		realCoordinates(&x1, &y1, offsetX, offsetY, currentZoom);
-		SetTextColor(hdc, currentColor);
+		SetTextColor(drawingArea, currentColor);
 		StretchBlt(drawingArea, 0, 0, *hdcWidth, *hdcHeight, finalPicture, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 		TextOut(drawingArea, x1, y1, text, textLenght);
 		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcHeight, drawingArea, offsetX, offsetY, *hdcWidth / currentZoom, *hdcHeight / currentZoom, SRCCOPY);

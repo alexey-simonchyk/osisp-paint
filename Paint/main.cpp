@@ -4,6 +4,11 @@
 #include "Window.cpp"
 #include "Dialog.cpp"
 
+#define MAX_LETTER_KEY 90
+#define MIN_LETTER_KEY 65
+#define MAX_NUMBER_KEY 57
+#define MIN_NUMBER_KEY 48
+
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); // message handler
 void MenuCommand(HWND hWnd, WPARAM param, int drawItem);
 void setChoosenWidth(int choosenWidth);
@@ -12,6 +17,7 @@ UINT CheckDrawItem();
 void OpenFileDialog(HWND hwnd, bool isOpenFile);
 void chooseColor(HWND hWnd);
 void setDrawItem(int newDrawItem, int drawItem);
+bool checkKey(WPARAM wParam);
 HMENU drawItemsMenu;
 HMENU widthPenMenu;
 Window *window = NULL;
@@ -159,14 +165,36 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			if (!window->getDrawing())
 			{
 				window->setDrawItem(drawItem, hWnd);
+				window->saveMousePosition(hWnd);
 			}
 			else
 			{
-				if (drawItem == MENU_TEXT)
+				window->endDraw(hWnd);
+				switch (drawItem)
+				{
+					case MENU_TEXT:
+						window->saveMousePosition(hWnd);
+						window->setDrawItem(MENU_TEXT, hWnd);
+						window->endPrintText();
+						break;
+
+					case MENU_POLY_LINE:
+						window->setDrawItem(drawItem, hWnd);
+						break;
+				}
+			}
+			break;
+
+		case WM_RBUTTONDOWN:
+			if (window->getDrawing())
+			{
+				if (drawItem == MENU_POLY_LINE)
 				{
 					window->endDraw(hWnd);
-					window->saveMousePosition(hWnd);
-					window->setDrawItem(MENU_TEXT, hWnd);
+				}
+				else if (drawItem == MENU_TEXT)
+				{
+					window->endDraw(hWnd);
 					window->endPrintText();
 				}
 			}
@@ -177,40 +205,34 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_KEYDOWN:
-			if (window->getDrawing())
+		{
+			bool temp = checkKey(wParam);
+			if (window->getDrawing() && temp)
 			{
 				hdc = GetDC(hWnd);
 				window->printText(hdc, (wchar_t)wParam);
 				ReleaseDC(hWnd, hdc);
 			}
 			break;
+		}
 
 		case WM_LBUTTONUP:
-			if (drawItem != MENU_TEXT)
+			if (drawItem == MENU_PENCIL)
 				window->endDraw(hWnd);
-			break;
-
-		case WM_RBUTTONDOWN:
-			if (drawItem == MENU_TEXT)
-			{
-				window->endDraw(hWnd);
-				window->endPrintText();
-			}
-			else if (drawItem == MENU_POLY_LINE)
-			{
-				window->endDraw(hWnd);
-				window->setDrawItem(drawItem, hWnd);
-			}
 			break;
 
 		case WM_MOUSEMOVE:
 		{
+			TrackMouse(hWnd);
 			if (drawItem != MENU_TEXT)
 			{
-				TrackMouse(hWnd);
 				window->setMousePosition(hWnd);
 				if (window->getDrawing())
-					window->sendRedrawMsg(hWnd, FALSE);
+				{
+					hdc = GetDC(hWnd);
+					window->draw(hdc);
+					ReleaseDC(hWnd, hdc);
+				}
 			}
 			break;
 		}
@@ -268,6 +290,17 @@ UINT CheckDrawItem()
 	return 0;
 }
 
+
+bool checkKey(WPARAM wParam)
+{
+	if (wParam >= MIN_LETTER_KEY || wParam <= MAX_LETTER_KEY)
+		return true;
+	if (wParam >= MIN_NUMBER_KEY || wParam <= MAX_NUMBER_KEY)
+		return true;
+	if (wParam == VK_SPACE || wParam == VK_BACK)
+		return true;
+	return false;
+}
 
 void TrackMouse(HWND hWnd) // detect mouse left the window
 {

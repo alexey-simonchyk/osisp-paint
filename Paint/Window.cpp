@@ -158,7 +158,7 @@ public:
 			xMaxScroll = hdcWidth - hdcWidth / currentZoom;
 			yMaxScroll = hdcHeight - hdcHeight / currentZoom;
 		}
-		
+
 		scrollInfo.cbSize = sizeof(SCROLLINFO);
 		scrollInfo.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
 		scrollInfo.nMin = 0;
@@ -269,8 +269,8 @@ public:
 		{
 			MessageBox(NULL, L"Error creating file", L"Error", MB_OK);
 		}
-		paint->saveBufferHDC(enhHDC);
-		SetMapMode(enhHDC, MM_ANISOTROPIC);
+		paint->saveBufferHDC(enhHDC, currentZoom);
+		//SetMapMode(enhHDC, MM_ANISOTROPIC);
 		HENHMETAFILE enhFile = CloseEnhMetaFile(enhHDC);
 		ReleaseDC(hWnd, hdc);
 	}

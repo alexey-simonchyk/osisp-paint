@@ -4,10 +4,7 @@
 #include "Window.cpp"
 #include "Dialog.cpp"
 
-#define MAX_LETTER_KEY 90
-#define MIN_LETTER_KEY 65
-#define MAX_NUMBER_KEY 57
-#define MIN_NUMBER_KEY 48
+
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM); // message handler
 void MenuCommand(HWND hWnd, WPARAM param, int drawItem);
@@ -17,14 +14,15 @@ UINT CheckDrawItem();
 void OpenFileDialog(HWND hwnd, bool isOpenFile);
 void chooseColor(HWND hWnd);
 void setDrawItem(int newDrawItem, int drawItem);
-bool checkKey(WPARAM wParam);
 HMENU drawItemsMenu;
 HMENU widthPenMenu;
 Window *window = NULL;
+HINSTANCE hInst;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 					LPSTR lpCmdLine, int nCmdShow)
 {
+	hInst = hInstance;
 	TCHAR szClassName[] = L"My class";
 	HWND hMainWindow;
 	MSG msg;
@@ -101,6 +99,7 @@ void CreateMainMenu(HWND hWnd)
 	colorMenu = CreateMenu();
 	AppendMenu(colorMenu, MF_STRING, MENU_COLOR, L"Color");
 	AppendMenu(hMenu, MF_POPUP, (UINT)colorMenu, L"Color");
+	AppendMenu(hMenu, MF_STRING, MENU_ABOUT_PROGRAM, L"About program");
 	SetMenu(hWnd, hMenu);
 }
 
@@ -204,10 +203,9 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			window->endDraw(hWnd);
 			break;
 
-		case WM_KEYDOWN:
+		case WM_CHAR:
 		{
-			bool temp = checkKey(wParam);
-			if (window->getDrawing() && temp)
+			if (window->getDrawing())
 			{
 				hdc = GetDC(hWnd);
 				window->printText(hdc, (wchar_t)wParam);
@@ -291,17 +289,6 @@ UINT CheckDrawItem()
 }
 
 
-bool checkKey(WPARAM wParam)
-{
-	if (wParam >= MIN_LETTER_KEY || wParam <= MAX_LETTER_KEY)
-		return true;
-	if (wParam >= MIN_NUMBER_KEY || wParam <= MAX_NUMBER_KEY)
-		return true;
-	if (wParam == VK_SPACE || wParam == VK_BACK)
-		return true;
-	return false;
-}
-
 void TrackMouse(HWND hWnd) // detect mouse left the window
 {
 	TRACKMOUSEEVENT tme;
@@ -312,10 +299,32 @@ void TrackMouse(HWND hWnd) // detect mouse left the window
 	TrackMouseEvent(&tme);
 }
 
-void MenuCommand(HWND hWnd, WPARAM param, int drawItem)
+BOOL CALLBACK DlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_COMMAND:
+		if (LOWORD(wParam) == IDOK)
+		{
+			EndDialog(hWnd, 0);
+			return true;
+		}
+		break;
+	case WM_CLOSE:
+		EndDialog(hWnd, 0);
+		return true;
+		break;
+	}
+	return false;
+}
+
+void MenuCommand(HWND hWnd, WPARAM param, int drawItem )
 {
 	switch (param)
 	{
+		case MENU_ABOUT_PROGRAM:
+			DialogBoxParam(hInst, MAKEINTRESOURCE(101), hWnd, DlgProc, 0);
+			break;
 		case MENU_OPEN:
 			OpenFileDialog(hWnd, true);
 			break;
@@ -399,7 +408,6 @@ void chooseColor(HWND hWnd)
 void OpenFileDialog(HWND hWnd, bool isOpenFile)
 {
 	Dialog *dialog = new Dialog();
-	bool temp = false;
 	char szFileName[MAX_PATH] = "";
 	LPWSTR filePath;
 	if (isOpenFile)

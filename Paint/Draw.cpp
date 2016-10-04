@@ -157,6 +157,10 @@ public:
 	void setColor(DWORD color)
 	{
 		currentColor = color;
+		HBRUSH tempBrush, deleteObj;
+		tempBrush = CreateSolidBrush(color);
+		deleteObj = (HBRUSH)SelectObject(drawingArea, tempBrush);
+		DeleteObject(deleteObj);
 		currentPen = CreatePen(PS_SOLID, currentPenWidth, currentColor);
 		setPen();
 	}
@@ -185,7 +189,7 @@ public:
 		PlayEnhMetaFile(drawingArea, henHMetaFile, rect);
 	}
 
-	void saveBufferHDC(HDC hdc)
+	void saveBufferHDC(HDC hdc, int currentZoom)
 	{
 		StretchBlt(hdc, 0, 0, *hdcWidth, *hdcWidth, drawingArea, 0, 0, *hdcWidth, *hdcHeight, SRCCOPY);
 	}
